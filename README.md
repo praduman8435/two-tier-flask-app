@@ -1,254 +1,258 @@
 # 2-Tier Application Deployment
 
-## This is a basic Flask application that works with MySQL database
+## [Launch an EC2 instance on AWS](#wrap-up)
 
+### name the EC2 instance:
 
-### **_Launch an EC2 instance on AWS_**
+  ![name.png](images/name.png)
 
-**name the EC2 instance:**
+### select an OS image ubuntu free tier eligible:
 
-![name.png](images/name.png)
+  ![os.png](images/os.png)
 
-**select an OS image ubuntu free tier eligible:**
+### create a new key pair:
 
-![os.png](images/os.png)
+  ![key.png](images/key.png)
 
-**create a new key pair:**
+### rest remain as default and click on launch instance:
 
-![key.png](images/key.png)
+  ![launch.png](images/launch.png)
 
-**rest remain as default and click on launch instance:**
+### make sure instance is running:
 
-![launch.png](images/launch.png)
+  ![instance.png](images/instance.png)
 
-**make sure instance is running:**
 
-![instance.png](images/instance.png)
+## [_Connect EC2 instance with the local terminal_](#wrap-up)
 
+### connect the created EC2 instance to the local terminal using ssh client:
 
-### **_Connect EC2 instance with the local terminal_**
+  ![connect.png](images/connect.png)
 
-**connect the created EC2 instance to the local terminal using ssh client:**
+### open the local terminal and run the commands:
 
-![connect.png](images/connect.png)
+  ```bash
+  chmod 400 2-tier-app.pem
+  ```
 
-**open the local terminal and run the commands:**
+### check your instance public IP address:
 
-```bash
-chmod 400 2-tier-app.pem
-```
+  ![ip.png](images/ip.png)
 
-**check your instance public IP address:**
+### run command on local terminal:
 
-![ip.png](images/ip.png)
+  ```bash
+  ssh -i "path-of-your-key-pair" ubuntu@13.232.235.216
+  ```
 
-**run command on local terminal:**
+### EC2 instance connected:
 
-```bash
-ssh -i "path-of-your-key-pair" ubuntu@13.232.235.216
-```
+  ![cnection.png](images/cnection.png)
 
-**EC2 instance connected:**
+### update and upgrade the machine :
 
-![cnection.png](images/cnection.png)
+  ```bash
+  sudo apt update
+  sudo apt upgrade
+  ```
 
-**update and upgrade the machine :**
+## [_Setting up Docker on ubuntu_](#wrap-up)
 
-```bash
-sudo apt update
-sudo apt upgrade
-```
+ ```bash
+ sudo apt install docker.io
+ ```
 
-### **_Setting up Docker on ubuntu_**
+### change owner to the current user for /var/run/docker.sock :
 
-```bash
-sudo apt install docker.io
-```
+  ```bash
+  sudo chown $USER /var/run/docker.sock
+  ```
 
-**change owner to the current user for /var/run/docker.sock :**
+### to check images that are running :
 
-```bash
-sudo chown $USER /var/run/docker.sock
-```
+  ```bash
+  docker ps
+  ```
 
-**to check images that are running :**
+### clone the project repo from github :
 
-```bash
-docker ps
-```
+  ```bash
+  git clone https://github.com/praduman8435/two-tier-flask-app.git
+  ```
 
-**clone the project repo from github :**
 
-```bash
-git clone https://github.com/praduman8435/two-tier-flask-app.git
-```
+## [_Create a Docker container using the image_](#wrap-up)
 
-### **_Create a Docker container using the image_**
+ ```bash
+ docker run -d -p 5000:5000 flaskapp:latest
+ ```
 
-```bash
-docker run -d -p 5000:5000 flaskapp:latest
-```
+### change the inbound rules to access the port 5000 from anywhere:
 
-**change the inbound rules to access the port 5000 from anywhere:**
+  ![inbnd.png](images/inbnd.png)
 
-![inbnd.png](images/inbnd.png)
+### create a mysql container using the image:
 
-**create a mysql container using the image:**
+  ```bash
+  docker run -d -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD="admin" mysql:5.7
+  ```
 
-```bash
-docker run -d -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD="admin" mysql:5.7
-```
+### check the containers that are running:
 
-**check the containers that are running:**
+  ```bash
+  docker ps
+  ```
 
-```bash
-docker ps
-```
+  ![dbh.png](images/dbh.png)
 
-![dbh.png](images/dbh.png)
+### _here the both containers are running but we can’t see website on the port 5000 because both the conatiners are not interconnected_
 
-**_here the both containers are running but we can’t see website on the port 5000 because both the conatiners are not interconnected_**
 
-### **_Create a Dockerfile for flask application_**
+## [_Create a Dockerfile for flask application_](#wrap-up)
 
-**change directory to two-tier-flask-app:**
+### change directory to two-tier-flask-app:
 
-![cd.png](images/cd.png)
+  ![cd.png](images/cd.png)
 
-![ls.png](images/ls.png)
+  ![ls.png](images/ls.png)
 
-**the remove the Dockerfile first to write from beginning:**
+### the remove the Dockerfile first to write from beginning:
 
-```bash
-rm -rf Dockerfile
-```
+  ```bash
+  rm -rf Dockerfile
+  ```
 
-**create a Dockerfile:**
+### create a Dockerfile:
 
-```bash
-vim Dockerfile
-```
+  ```bash
+  vim Dockerfile
+  ```
 
-```docker
-#base image (gives an operating system in which python installed)
-FROM python:3.9-slim
+  ```docker
+  #base image (gives an operating system in which python installed)
+  FROM python:3.9-slim
 
-#we need to run the application in a folder (so create one)
-WORKDIR /app
+  #we need to run the application in a folder (so create one)
+  WORKDIR /app
 
-    #update the OS
-RUN apt-get update -y \
-    #upgrade the packages
-    && apt-get upgrade -y \
-    #install mysql libraries\
-    && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
-    #remove the temporary files that creates during installation
-    && rm -rf /var/lib/lists/*
+      #update the OS
+  RUN apt-get update -y \
+      #upgrade the packages
+      && apt-get upgrade -y \
+      #install mysql libraries\
+      && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
+      #remove the temporary files that creates during installation
+      && rm -rf /var/lib/lists/*
 
-#copy requirements.txt file
-COPY requirements.txt .
+  #copy requirements.txt file
+  COPY requirements.txt .
 
-#python is internally accesing mysql so we require to install a mysql client of python
-RUN pip install mysqlclient
+  #python is internally accesing mysql so we require to install a mysql client of python
+  RUN pip install mysqlclient
 
-#install the packages in requiremets.txt
-RUN pip install -r requirements.txt
+  #install the packages in requiremets.txt
+  RUN pip install -r requirements.txt
 
-COPY . .
+  COPY . .
 
-CMD ["python","app.py"]
-```
+  CMD ["python","app.py"]
+  ```
 
-**build image using Dockerfile:**
+### build image using Dockerfile:
 
-```bash
-docker build . -t flaskapp
-```
+  ```bash
+  docker build . -t flaskapp
+  ```
 
-**to check the images:**
+### to check the images:
 
-```bash
-docker images
-```
+  ```bash
+  docker images
+  ```
 
-![im.png](images/im.png)
+  ![im.png](images/im.png)
 
-### **_Create a docker network to connect the flaskapp and mysql container_**
 
-```bash
-docker network create "network-name"
-```
+## [_Create a docker network to connect the flaskapp and mysql container_](#wrap-up)
 
-**now we required to attach this network with both the container so we need to kill the previous containers that are running and make a new one:**
+ ```bash
+ docker network create "network-name"
+ ```
 
-```bash
-docker kill "container_id_mysql"  "container_id_flask"
-```
+### now we required to attach this network with both the container so we need to kill the previous containers that are running and make a new one:
 
-![jid.png](images/jid.png)
+  ```bash
+  docker kill "container_id_mysql"  "container_id_flask"
+  ```
 
-**now create again containers for mysql and flask using docker run command in which docker network are attached:**
+  ![jid.png](images/jid.png)
 
-```bash
-docker run -d --name mysql --network=twotier -e MYSQL_DATABASE=myDb -e MYSQL_USER=admin -e MYSQL_PASSWORD=admin -e MYSQL_ROOT_PASSWORD=admin -p 3306:3306 mysql:5.7
-```
+### now create again containers for mysql and flask using docker run command in which docker network are attached:
 
-```bash
-docker run -d --name flaskapp --network=twotier -e MYSQL_HOST=mysql -e MYSQL_USER=admin -e MYSQL_PASSWORD=admin -e MYSQL_DB=myDb -p 5000:5000 flaskapp:latest
-```
+  ```bash
+  docker run -d --name mysql --network=twotier -e MYSQL_DATABASE=myDb -e MYSQL_USER=admin -e 
+  MYSQL_PASSWORD=admin -e MYSQL_ROOT_PASSWORD=admin -p 3306:3306 mysql:5.7
+  ```
 
-**to check the network that are present:**
+  ```bash
+  docker run -d --name flaskapp --network=twotier -e MYSQL_HOST=mysql -e MYSQL_USER=admin -e 
+  MYSQL_PASSWORD=admin -e MYSQL_DB=myDb -p 5000:5000 flaskapp:latest
+  ```
 
-```bash
-docker network ls
-```
+### to check the network that are present:
 
-![ner.png](images/ner.png)
+  ```bash
+  docker network ls
+  ```
 
-**to check the containers that are in the network:**
+  ![ner.png](images/ner.png)
 
-```bash
-docker network inspect "network-name"
-```
+### to check the containers that are in the network:
 
-![inu.png](images/inu.png)
+  ```bash
+  docker network inspect "network-name"
+  ```
 
-### Create the `messages` table in MySQL database
+  ![inu.png](images/inu.png)
 
-**firstly, we require to enter in the mysql container:**
 
-```bash
-docker exec -it "mysql-container-id" bash
-```
+## [Create the `messages` table in MySQL database](#wrap-up)
 
-```bash
-mysql -u root -p
-#enter the password you save for mysql
-```
+### firstly, we require to enter in the mysql container:
 
-![oio.png](images/oio.png)
+  ```bash
+  docker exec -it "mysql-container-id" bash
+  ```
 
-```bash
-show databases;
-```
+  ```bash
+  mysql -u root -p
+  #enter the password you save for mysql
+  ```
 
-![pp.png](images/pp.png)
+  ![oio.png](images/oio.png)
 
-```bash
-use myDb;
-```
+  ```bash
+  show databases;
+  ```
 
-```bash
-CREATE TABLE messages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    message TEXT
-);
-```
+  ![pp.png](images/pp.png)
 
-![ui.png](images/ui.png)
+  ```bash
+  use myDb;
+  ```
 
-**now you can see the website on public IPv4 address on port 5000:**
+  ```bash
+  CREATE TABLE messages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      message TEXT
+  );
+  ```
 
-![tn.png](images/tn.png)
+  ![ui.png](images/ui.png)
 
-![tr.png](images/tr.png)
+
+## [now you can see the website on public IPv4 address on port 5000:](#wrap-up)
+
+###  ![tn.png](images/tn.png)
+
+###  ![tr.png](images/tr.png)
