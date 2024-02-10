@@ -1,10 +1,7 @@
 # 2-Tier Application Deployment
 
-### This is a basic Flask application that works with MySQL database
+## This is a basic Flask application that works with MySQL database
 
-[GitHub - praduman8435/two-tier-flask-app: 2-Tier Application Deployment](https://github.com/praduman8435/two-tier-flask-app)
-
-**Source code**
 
 ### **_Launch an EC2 instance on AWS_**
 
@@ -27,6 +24,7 @@
 **make sure instance is running:**
 
 ![instance.png](images/instance.png)
+
 
 ### **_Connect EC2 instance with the local terminal_**
 
