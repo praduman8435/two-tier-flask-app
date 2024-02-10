@@ -1,4 +1,4 @@
-# 2-Tier Application Deployment
+# In this project we Deploy a basic Flask application that works with MySQL database
 
 ## [Launch an EC2 instance on AWS](#wrap-up)
 
