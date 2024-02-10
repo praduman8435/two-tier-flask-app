@@ -6,33 +6,33 @@
 
 **Source code**
 
-### ***Launch an EC2 instance on AWS***
+### **_Launch an EC2 instance on AWS_**
 
 **name the EC2 instance:**
 
-![name.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/name.png)
+![name.png](images/name.png)
 
 **select an OS image ubuntu free tier eligible:**
 
-![os.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/os.png)
+![os.png](images/os.png)
 
 **create a new key pair:**
 
-![key.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/key.png)
+![key.png](images/key.png)
 
 **rest remain as default and click on launch instance:**
 
-![launch.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/launch.png)
+![launch.png](images/launch.png)
 
 **make sure instance is running:**
 
-![instance.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/instance.png)
+![instance.png](images/instance.png)
 
-### ***Connect EC2 instance with the local terminal***
+### **_Connect EC2 instance with the local terminal_**
 
 **connect the created EC2 instance to the local terminal using ssh client:**
 
-![connect.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/connect.png)
+![connect.png](images/connect.png)
 
 **open the local terminal and run the commands:**
 
@@ -42,7 +42,7 @@ chmod 400 2-tier-app.pem
 
 **check your instance public IP address:**
 
-![ip.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/ip.png)
+![ip.png](images/ip.png)
 
 **run command on local terminal:**
 
@@ -52,7 +52,7 @@ ssh -i "path-of-your-key-pair" ubuntu@13.232.235.216
 
 **EC2 instance connected:**
 
-![cnection.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/cnection.png)
+![cnection.png](images/cnection.png)
 
 **update and upgrade the machine :**
 
@@ -61,7 +61,7 @@ sudo apt update
 sudo apt upgrade
 ```
 
-### ***Setting up Docker on ubuntu***
+### **_Setting up Docker on ubuntu_**
 
 ```bash
 sudo apt install docker.io
@@ -85,7 +85,7 @@ docker ps
 git clone https://github.com/praduman8435/two-tier-flask-app.git
 ```
 
-### ***Create a Docker container using the image***
+### **_Create a Docker container using the image_**
 
 ```bash
 docker run -d -p 5000:5000 flaskapp:latest
@@ -93,7 +93,7 @@ docker run -d -p 5000:5000 flaskapp:latest
 
 **change the inbound rules to access the port 5000 from anywhere:**
 
-![inbnd.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/inbnd.png)
+![inbnd.png](images/inbnd.png)
 
 **create a mysql container using the image:**
 
@@ -107,17 +107,17 @@ docker run -d -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD="admin" mysql:5.7
 docker ps
 ```
 
-![dbh.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/dbh.png)
+![dbh.png](images/dbh.png)
 
-***here the both containers are running but we can’t see website on the port 5000 because both the conatiners are not interconnected***
+**_here the both containers are running but we can’t see website on the port 5000 because both the conatiners are not interconnected_**
 
-### ***Create a Dockerfile  for flask application***
+### **_Create a Dockerfile for flask application_**
 
-**change directory to two-tier-flask-app:** 
+**change directory to two-tier-flask-app:**
 
-![cd.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/cd.png)
+![cd.png](images/cd.png)
 
-![ls.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/ls.png)
+![ls.png](images/ls.png)
 
 **the remove the Dockerfile first to write from beginning:**
 
@@ -146,7 +146,7 @@ RUN apt-get update -y \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
     #remove the temporary files that creates during installation
     && rm -rf /var/lib/lists/*
-    
+
 #copy requirements.txt file
 COPY requirements.txt .
 
@@ -167,15 +167,15 @@ CMD ["python","app.py"]
 docker build . -t flaskapp
 ```
 
-**to check the images:** 
+**to check the images:**
 
 ```bash
 docker images
 ```
 
-![im.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/im.png)
+![im.png](images/im.png)
 
-### ***Create a docker network to connect the flaskapp and mysql container***
+### **_Create a docker network to connect the flaskapp and mysql container_**
 
 ```bash
 docker network create "network-name"
@@ -187,7 +187,7 @@ docker network create "network-name"
 docker kill "container_id_mysql"  "container_id_flask"
 ```
 
-![jid.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/jid.png)
+![jid.png](images/jid.png)
 
 **now create again containers for mysql and flask using docker run command in which docker network are attached:**
 
@@ -205,7 +205,7 @@ docker run -d --name flaskapp --network=twotier -e MYSQL_HOST=mysql -e MYSQL_USE
 docker network ls
 ```
 
-![ner.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/ner.png)
+![ner.png](images/ner.png)
 
 **to check the containers that are in the network:**
 
@@ -213,7 +213,7 @@ docker network ls
 docker network inspect "network-name"
 ```
 
-![inu.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/inu.png)
+![inu.png](images/inu.png)
 
 ### Create the `messages` table in MySQL database
 
@@ -225,16 +225,16 @@ docker exec -it "mysql-container-id" bash
 
 ```bash
 mysql -u root -p
-#enter the password you save for mysql 
+#enter the password you save for mysql
 ```
 
-![oio.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/oio.png)
+![oio.png](images/oio.png)
 
 ```bash
 show databases;
 ```
 
-![pp.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/pp.png)
+![pp.png](images/pp.png)
 
 ```bash
 use myDb;
@@ -247,10 +247,10 @@ CREATE TABLE messages (
 );
 ```
 
-![ui.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/ui.png)
+![ui.png](images/ui.png)
 
 **now you can see the website on public IPv4 address on port 5000:**
 
-![tn.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/tn.png)
+![tn.png](images/tn.png)
 
-![tr.png](2-Tier%20Application%20Deployment%20ec3f43a822c541f095837b896b99462a/tr.png)
+![tr.png](images/tr.png)
